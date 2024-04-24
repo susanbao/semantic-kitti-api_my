@@ -9,6 +9,7 @@ import argparse
 import glfw
 import glfw.GLFW as GLFW_CONSTANTS
 
+
 import OpenGL
 from OpenGL.GL.shaders import compileProgram, compileShader
 from OpenGL.GL import *
@@ -24,6 +25,7 @@ from auxiliary.camera import Camera
 
 OpenGL.ERROR_ON_COPY = True
 OpenGL.ERROR_CHECKING = True
+import ipdb
 
 
 def glPerspective(fov, aspect, znear, zfar):
@@ -56,29 +58,13 @@ def unpack(compressed):
   uncompressed[7::8] = compressed[:] & 1
 
   return uncompressed
-  
 
-from PIL import Image
-def capture_screenshot(window, frame_number, filename_template='screenshot_{frame}.png'):
-    w, h = glfw.get_framebuffer_size(window)
-    glReadBuffer(GL_FRONT)
-    pixels = glReadPixels(0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE)
-    image = Image.frombytes("RGBA", (w, h), pixels)
-    image = image.transpose(Image.FLIP_TOP_BOTTOM)
-    filename = filename_template.format(frame=frame_number)
-    # root_tmp="C:\\Users\\25598\\Downloads\\vis\\vox_360"
-    root_tmp="C:\\Users\\25598\\Downloads\\vis\\vox_smkt"
-    if not os.path.exists(root_tmp):
-        os.makedirs(root_tmp)
-    filename=os.path.join(root_tmp,filename)
-    image.save(filename)
-    print(f"Screenshot saved to {filename}")
 
 class Window:
   def __init__(self):
     if not glfw.init():
       raise RuntimeError("Unable to initialize glfw.")
-    
+
     glfw.window_hint(GLFW_CONSTANTS.GLFW_CONTEXT_VERSION_MAJOR,3)
     glfw.window_hint(GLFW_CONSTANTS.GLFW_CONTEXT_VERSION_MINOR,3)
     glfw.window_hint(
@@ -89,13 +75,9 @@ class Window:
         GLFW_CONSTANTS.GLFW_OPENGL_FORWARD_COMPAT, 
         GLFW_CONSTANTS.GLFW_TRUE
     )
-    # glfw.window_hint(GLFW_CONSTANTS.GLFW_DOUBLEBUFFER, False)
 
-    w_window, h_window = 800, 600
-    # w_window, h_window = 1226, 370
-    win_ra_tmp=2
-    w_window, h_window = int(win_ra_tmp*w_window), int(win_ra_tmp*h_window)
-
+    # w_window, h_window = 800, 600
+    w_window, h_window = 1600, 1200
 
     self.window = glfw.create_window(w_window, h_window, "Voxel Visualizer", None, None)
 
@@ -150,28 +132,17 @@ class Window:
     self.isDrag = False
     self.buttonPressed = None
     self.cam = Camera()
-    
-    # self.cam.lookAt(25.0, 0, 25.0, 0.0, 0.0, 0.0)
-    # self.cam.pitch_ = -0.5 * math.pi
-    # self.cam.lookAt(25.0, 25.0, 25.0, 0.0, 0.0, 0.0)
-
-    # self.cam.lookAt(0, 25.0, 25.0, 0.0, 0.0, 0.0)
-
-    self.cam.lookAt(0, 25.0, 25.0, 0.0, 0.0, 0.0)
-    self.cam.pitch_=self.cam.pitch_/4
-
-    self.cam.y_=10
-    self.cam.z_=20
-
-
-    # self.cam.y_=-0
-    # self.cam.z_=0
+    self.cam.lookAt(25.0, 25.0, 25.0, 0.0, 0.0, 0.0)
 
     self.currentTimestep = 0
     self.sliderValue = 0
     self.showLabels = True
 
-
+    glfw.set_input_mode(
+            self.window, 
+            GLFW_CONSTANTS.GLFW_STICKY_MOUSE_BUTTONS, 
+            GLFW_CONSTANTS.GLFW_TRUE
+    )
 
   def initializeGL(self):
     """ initialize GL related stuff. """
@@ -307,7 +278,6 @@ class Window:
       files = os.listdir(complete_path)
 
       data = sorted([os.path.join(complete_path, f) for f in files if f.endswith(".bin")])
-      data = sorted([os.path.join(complete_path, f) for f in files if f.endswith(".pseudo")])
       if len(data) > 0:
         self.availableData[subdir].append("input")
         self.data[subdir]["input"] = data
@@ -357,33 +327,6 @@ class Window:
     # Note: uint with np.uint32 did not work as expected! (with instances and uint32 this causes problems!)
     if data_name == "labels":
       buffer_data = np.fromfile(self.data[subdir][data_name][t], dtype=np.uint16).astype(np.float32)
-      # root_tmp=r"/Users/sanbaosu/Documents/code/semantic-kitti-api/kitti/dataset/labels/08"
-      # lbl_tmp=np.load(os.path.join(root_tmp, os.path.basename(self.data[subdir][data_name][t].replace(".label", "_1_1.npy")))).reshape(-1)
-      root_tmp=r"/Users/sanbaosu/Documents/code/semantic-kitti-api/kitti/baseline_pred"
-      # root_tmp=r"/Users/sanbaosu/Documents/code/semantic-kitti-api/kitti/class_balance_person_pred"
-      lbl_tmp=np.load(os.path.join(root_tmp, os.path.basename(self.data[subdir][data_name][t].replace(".label", ".npy")))).reshape(-1)
-      buffer_data=lbl_tmp.astype(np.float32).copy()
-      buffer_data[buffer_data==10] = 44
-      buffer_data[buffer_data==11] = 48
-      buffer_data[buffer_data==12] = 49
-      buffer_data[buffer_data==13] = 50
-      buffer_data[buffer_data==14] = 51
-      buffer_data[buffer_data==15] = 70
-      buffer_data[buffer_data==16] = 71
-      buffer_data[buffer_data==17] = 72
-      buffer_data[buffer_data==18] = 80
-      buffer_data[buffer_data==19] = 81
-      buffer_data[buffer_data==1] = 10
-      buffer_data[buffer_data==2] = 11
-      buffer_data[buffer_data==3] = 15
-      buffer_data[buffer_data==4] = 18
-      buffer_data[buffer_data==5] = 20
-      buffer_data[buffer_data==6] = 30
-      buffer_data[buffer_data==7] = 31
-      buffer_data[buffer_data==8] = 32
-      buffer_data[buffer_data==9] = 40
-      buffer_data[lbl_tmp==255]=0
-      a=0
     else:
       buffer_data = unpack(np.fromfile(self.data[subdir][data_name][t], dtype=np.uint8)).astype(np.float32)
 
@@ -430,7 +373,6 @@ class Window:
 
       if key == glfw.KEY_N or key == glfw.KEY_RIGHT:
         self.currentTimestep = self.sliderValue = min(self.num_scans - 1, self.currentTimestep + 1)
-        # capture_screenshot(window, self.currentTimestep)
 
       if key == glfw.KEY_Q or key == glfw.KEY_ESCAPE:
         exit(0)
@@ -638,7 +580,7 @@ class Window:
       self.prgDrawPose["pose"] = np.identity(4, dtype=np.float32)
       self.prgDrawPose["size"] = 1.0
 
-      # glDrawArrays(GL_POINTS, 0, 1)
+      glDrawArrays(GL_POINTS, 0, 1)
       self.prgDrawPose.release()
 
       glBindVertexArray(0)
@@ -653,48 +595,28 @@ class Window:
 
 if __name__ == "__main__":
 
-  parser = argparse.ArgumentParser("./visualize_voxels.py")
-  # parser.add_argument(
-  #     '--dataset',
-  #     '-d',
-  #     type=str,
-  #     required=True,
-  #     help='Dataset to visualize. No Default',
-  # )
+  parser = argparse.ArgumentParser("./visualize_voxels_origin.py")
+  parser.add_argument(
+      '--dataset',
+      '-d',
+      type=str,
+      required=True,
+      help='Dataset to visualize. No Default',
+  )
 
-  # parser.add_argument(
-  #     '--sequence',
-  #     '-s',
-  #     type=str,
-  #     default="00",
-  #     required=False,
-  #     help='Sequence to visualize. Defaults to %(default)s',
-  # )
+  parser.add_argument(
+      '--sequence',
+      '-s',
+      type=str,
+      default="00",
+      required=False,
+      help='Sequence to visualize. Defaults to %(default)s',
+  )
 
   FLAGS, unparsed = parser.parse_known_args()
 
-  FLAGS.dataset="D:\semantic-kitti\data_odometry_voxels\dataset"
-  FLAGS.dataset="C:\\Users\\25598\\Downloads\\monovxl"
-  FLAGS.dataset="D:\semantic-kitti\sequences_msnet3d_sweep10"
-  FLAGS.dataset="C:\\Users\\25598\\Downloads\\sequences_zerodepth_mono_sweep10"
-  FLAGS.dataset="C:\\Users\\25598\\Downloads\\voxel_waymo_s1\\sequences_metric3d_monocular_sweep1"
-  FLAGS.dataset="C:\\Users\\25598\\Downloads\\voxel_waymo_s1\\sequences_metric3d_trinocular_sweep1"
-  FLAGS.dataset="C:\\Users\\25598\\Downloads\\voxel_waymo_vis\\sequences_metric3d_monocular_sweep10"
-  FLAGS.dataset="D:\\NetDisk\\waymo_proposal\\dataset\\sequences_metric3d_trinocular_sweep10"
-  FLAGS.dataset="E:\mononerd_res_vis\sequences"
-
-  FLAGS.dataset=r"/Users/sanbaosu/Documents/code/semantic-kitti-api/kitti/dataset/sequences"
-  # FLAGS.dataset=r"C:\Users\25598\Downloads\vox_ori\voxformer\sequences"
-  # FLAGS.dataset=r"D:\semantic-kitti\data_odometry_voxels\dataset\sequences"#smkt gt
-  FLAGS.sequence="08"
-  # FLAGS.sequence="08"
-  # FLAGS.sequence="001"
-# C:\Users\25598\Downloads\voxel_waymo_s1\sequences_metric3d_trinocular_sweep1\000
-
-  # sequence_directory = os.path.join(FLAGS.dataset, FLAGS.sequence)
-  # sequence_directory = os.path.join(FLAGS.dataset, "sequences", FLAGS.sequence)
-  sequence_directory = os.path.join(FLAGS.dataset,FLAGS.sequence)
-
+  sequence_directory = os.path.join(FLAGS.dataset, "sequences", FLAGS.sequence)
+  # ipdb.set_trace()
   window = Window()
   window.open_directory(sequence_directory)
 
