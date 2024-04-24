@@ -8,3 +8,5 @@
 *.cxx
 RangeNet.py
 
+kitti/
+.DS_Store

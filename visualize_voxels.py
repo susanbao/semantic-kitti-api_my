@@ -357,10 +357,10 @@ class Window:
     # Note: uint with np.uint32 did not work as expected! (with instances and uint32 this causes problems!)
     if data_name == "labels":
       buffer_data = np.fromfile(self.data[subdir][data_name][t], dtype=np.uint16).astype(np.float32)
-      # root_tmp=r"/Users/sanbaosu/Documents/code/semantic-kitti-api/kitti/dataset/labels/08"
+      # root_tmp=r"/Users/sanbaosu/Documents/code/semantic-kitti-api_my/kitti/dataset/labels/08"
       # lbl_tmp=np.load(os.path.join(root_tmp, os.path.basename(self.data[subdir][data_name][t].replace(".label", "_1_1.npy")))).reshape(-1)
-      root_tmp=r"/Users/sanbaosu/Documents/code/semantic-kitti-api/kitti/baseline_pred"
-      # root_tmp=r"/Users/sanbaosu/Documents/code/semantic-kitti-api/kitti/class_balance_person_pred"
+      root_tmp=r"/Users/sanbaosu/Documents/code/semantic-kitti-api_my/kitti/baseline_pred"
+      # root_tmp=r"/Users/sanbaosu/Documents/code/semantic-kitti-api_my/kitti/class_balance_person_pred"
       lbl_tmp=np.load(os.path.join(root_tmp, os.path.basename(self.data[subdir][data_name][t].replace(".label", ".npy")))).reshape(-1)
       buffer_data=lbl_tmp.astype(np.float32).copy()
       buffer_data[buffer_data==10] = 44
@@ -683,7 +683,7 @@ if __name__ == "__main__":
   FLAGS.dataset="D:\\NetDisk\\waymo_proposal\\dataset\\sequences_metric3d_trinocular_sweep10"
   FLAGS.dataset="E:\mononerd_res_vis\sequences"
 
-  FLAGS.dataset=r"/Users/sanbaosu/Documents/code/semantic-kitti-api/kitti/dataset/sequences"
+  FLAGS.dataset=r"/Users/sanbaosu/Documents/code/semantic-kitti-api_my/kitti/dataset/sequences"
   # FLAGS.dataset=r"C:\Users\25598\Downloads\vox_ori\voxformer\sequences"
   # FLAGS.dataset=r"D:\semantic-kitti\data_odometry_voxels\dataset\sequences"#smkt gt
   FLAGS.sequence="08"
